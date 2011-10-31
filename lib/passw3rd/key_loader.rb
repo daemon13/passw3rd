@@ -7,7 +7,7 @@ module Passw3rd
 
     def self.load(path=nil) 
       if path.nil?
-        path = ENV['HOME']
+        path = ::Passw3rd::PasswordService.key_file_dir
       end
 
       begin

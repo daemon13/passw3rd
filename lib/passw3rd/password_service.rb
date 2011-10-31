@@ -1,3 +1,5 @@
+require 'open-uri'
+
 module Passw3rd
   class PasswordService
     class << self
@@ -22,7 +24,8 @@ module Passw3rd
     end
 
     def self.get_password (password_file, key_path = key_file_dir)
-      encoded_password = Base64.decode64(IO.readlines(File.join(password_file_dir, password_file)).join)
+      uri = _parse_uri(password_file)
+      encoded_password = Base64.decode64(open(uri.to_s) { |f| f.read })
       decrypt(encoded_password, key_path)
     end
 
@@ -30,7 +33,7 @@ module Passw3rd
       enc_password = encrypt(password, key_path)
       base64pw = Base64.encode64(enc_password) 
       path = File.join(password_file_dir, output_path)
-      File.open(path, 'w') { |f| f.write base64pw }
+      open(path, 'w') { |f| f.write base64pw }
       path
     end
 
@@ -53,7 +56,7 @@ module Passw3rd
         d = cipher.update(cipher_text)
         d << cipher.final
       rescue OpenSSL::Cipher::CipherError => err
-        puts "Coudln't decrypt password.  Are you using the right keys?"
+        puts "Couldn't decrypt password.  Are you using the right keys?"
         raise err
       end
     end
@@ -67,6 +70,14 @@ module Passw3rd
       cipher.key = pair.key
       cipher.iv = pair.iv
       cipher
+    end
+    
+    def self._parse_uri password_file
+      unless (password_file =~ URI::regexp(['ftp', 'http', 'https', 'file'])).nil?
+        URI.parse(password_file)
+      else
+        File.join(password_file_dir, password_file)
+      end
     end
   end
 end
