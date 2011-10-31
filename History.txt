@@ -1,3 +1,10 @@
+=== 0.1.0 / 2011-10-31
+
+Finally some real life support
+* Defaults to aes-256 for regulatory compliance (Thanks Edward Bonver)
+* loads URIs, so password files can live anywhere (Thanks Ben Duong)
+* Internals: code cleanup (Thanks @xternal), guard + test::unit + rspec love, better configuration options (thanks again @xternal)
+
 === 0.0.11 / 2011-10-12
 
 Keys/ivs were being written as arrays, broke openssl command line compatibility:
