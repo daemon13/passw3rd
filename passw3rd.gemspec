@@ -16,5 +16,6 @@ Gem::Specification.new do |s|
   s.files       += Dir.glob("lib/**/*")
   s.files       += Dir.glob("bin/**/*")
   s.files       += Dir.glob("test/**/*")
+  s.files       += Dir.glob("spec/**/*")
   s.executables = [ "passw3rd" ]
 end
