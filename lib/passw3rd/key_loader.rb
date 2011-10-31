@@ -29,7 +29,8 @@ module Passw3rd
         path = ENV['HOME']
       end    
 
-      cipher = OpenSSL::Cipher::Cipher.new('aes-128-cbc')
+      # d'oh!
+      cipher = OpenSSL::Cipher::Cipher.new(::Passw3rd::PasswordService.cipher_name)
       iv = cipher.random_iv
       key = cipher.random_key
 

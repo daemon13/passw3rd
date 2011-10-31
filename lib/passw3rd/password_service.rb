@@ -13,7 +13,7 @@ module Passw3rd
 
       attr_writer :cipher_name
       def cipher_name
-        @cipher_name || 'aes-128-cbc'
+        @cipher_name || 'aes-256-cbc'
       end
     end
 

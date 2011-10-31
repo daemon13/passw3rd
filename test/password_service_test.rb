@@ -11,7 +11,7 @@ class PasswordServiceTest < Test::Unit::TestCase
 
     ::Passw3rd::KeyLoader.create_key_iv_file(Dir.tmpdir)
     ::Passw3rd::PasswordService.key_file_dir = Dir.tmpdir    
-    ::Passw3rd::PasswordService.cipher_name = 'aes-128-cbc'
+    ::Passw3rd::PasswordService.cipher_name = 'aes-256-cbc'
   end
   
   def test_enc_dec
