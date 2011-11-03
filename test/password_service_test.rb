@@ -31,7 +31,7 @@ class PasswordServiceTest < Test::Unit::TestCase
 
   def test_set_and_get_password
     password_file = ::Passw3rd::PasswordService.write_password_file(@random_string, "test")
-    decrypted = Passw3rd::PasswordService.get_password("test")
+    decrypted = ::Passw3rd::PasswordService.get_password("test")
     assert_equal(@random_string, decrypted)
   end
 
@@ -39,17 +39,17 @@ class PasswordServiceTest < Test::Unit::TestCase
     ::Passw3rd::PasswordService.password_file_dir = Dir.tmpdir    
 
     password_file = ::Passw3rd::PasswordService.write_password_file(@random_string, "test2")
-    decrypted = Passw3rd::PasswordService.get_password("test2")
+    decrypted = ::Passw3rd::PasswordService.get_password("test2")
     assert_equal(@random_string, decrypted)
   end  
 
   def test_configure_with_block
-    Passw3rd::PasswordService.configure do |c|
+   ::Passw3rd::PasswordService.configure do |c|
       c.password_file_dir = "/tmp/"
       c.cipher_name = "aes-256-cbc"
     end
-    assert_equal(Passw3rd::PasswordService.password_file_dir, "/tmp/")
-    assert_equal(Passw3rd::PasswordService.cipher_name, "aes-256-cbc")
+    assert_equal(::Passw3rd::PasswordService.password_file_dir, "/tmp/")
+    assert_equal(::Passw3rd::PasswordService.cipher_name, "aes-256-cbc")
   end
   
   def test_gen_key

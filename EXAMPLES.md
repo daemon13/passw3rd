@@ -54,7 +54,7 @@ Java properties file
 Ruby on Rails config/database.yml
  
     initializer:
-    Passw3rd::PasswordService.password_file_dir = "passwords"
+    ::Passw3rd::PasswordService.password_file_dir = "passwords"
  
     Before:
  

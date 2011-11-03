@@ -32,7 +32,7 @@ module Passw3rd
 
     opts.on('-p', '--password-dir PATH', 'Read and write password files to this directory (default is ~/)') do |opt|
       password_dir = opt
-      Passw3rd::PasswordService.password_file_dir = password_dir
+      ::Passw3rd::PasswordService.password_file_dir = password_dir
       if !File.directory?(File.expand_path(password_dir))
         raise "#{password_dir} must be a directory"
       end      
@@ -57,13 +57,13 @@ module Passw3rd
 
     # generate key/IV
     if gen_key_path
-      Passw3rd::KeyLoader.create_key_iv_file(gen_key_path)
+     ::Passw3rd::KeyLoader.create_key_iv_file(gen_key_path)
       puts "generated keys in #{gen_key_path}"
     end
 
     # decrypt password_file using the key/IV in key_path
     if mode == "decrypt"
-      decrypted = Passw3rd::PasswordService.get_password(password_file, key_path)
+      decrypted =::Passw3rd::PasswordService.get_password(password_file, key_path)
       puts "The password is: #{decrypted}"
     end
 
@@ -77,7 +77,7 @@ module Passw3rd
         system 'stty echo; echo ""'
       end
 
-      file = Passw3rd::PasswordService.write_password_file(password, password_file, key_path)
+      file =::Passw3rd::PasswordService.write_password_file(password, password_file, key_path)
       puts "Wrote password to #{file}"
     end
   end
