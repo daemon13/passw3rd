@@ -56,7 +56,7 @@ module Passw3rd
         d = cipher.update(cipher_text)
         d << cipher.final
       rescue OpenSSL::Cipher::CipherError => err
-        puts "Couldn't decrypt password.  Are you using the right keys?"
+        puts "Couldn't decrypt password.  Are you using the right keys (#{key_path})?"
         raise err
       end
     end

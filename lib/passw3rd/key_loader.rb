@@ -25,8 +25,8 @@ module Passw3rd
     end
 
     def self.create_key_iv_file(path=nil)
-      if path.nil?
-        path = ENV['HOME']
+      unless path
+        path = ::Passw3rd::PasswordService.key_file_dir || ENV['HOME']
       end    
 
       # d'oh!
@@ -41,7 +41,7 @@ module Passw3rd
         puts "Couldn't write key/IV to #{path}\n"
         raise $!
       end
-
+      path
     end
   end
 

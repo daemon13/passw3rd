@@ -24,6 +24,11 @@ Command line use
         The password is: asdf
         $ passw3rd -d foobar_app -p ~/Desktop/
         The password is: asdf
+------------------------------------------------------------------------------
+
+Key rotation: simple
+
+[passw3rd (gh-10-key_rotation *$)]$ rake rotate_keys[~/passwords,~/passwords,aes-256-cbc]
  
  
 ------------------------------------------------------------------------------
