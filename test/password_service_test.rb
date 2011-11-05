@@ -51,10 +51,10 @@ class PasswordServiceTest < Test::Unit::TestCase
    ::Passw3rd::PasswordService.configure do |c|
       c.password_file_dir = Dir.tmpdir
       c.key_file_dir = Dir.tmpdir
-      c.cipher_name = ::Passw3rd::PasswordService::APPROVED_CIPHERS.first
+      c.cipher_name = ::Passw3rd::APPROVED_CIPHERS.first
     end
     assert_equal(::Passw3rd::PasswordService.password_file_dir, Dir.tmpdir)
-    assert_equal(::Passw3rd::PasswordService.cipher_name, ::Passw3rd::PasswordService::APPROVED_CIPHERS.first)
+    assert_equal(::Passw3rd::PasswordService.cipher_name, ::Passw3rd::APPROVED_CIPHERS.first)
   end
   
   def sudorandumb

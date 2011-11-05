@@ -1,20 +1,21 @@
 require 'open-uri'
 
 module Passw3rd
+  KEY_FILE = ".passw3rd-encryptionKey"
+  IV_FILE = ".passw3rd-encryptionIV"
+  APPROVED_CIPHERS = %w{aes-128-cbc aes-256-cbc aes-128-cfb aes-256-cfb}
+  
   class PasswordService
-    KEY_FILE = "/.passw3rd-encryptionKey"
-    IV_FILE = "/.passw3rd-encryptionIV"
-    APPROVED_CIPHERS = %w{aes-128-cbc aes-256-cbc aes-128-cfb aes-256-cfb}
 
     class << self
       attr_writer :password_file_dir
       def password_file_dir
-        @password_file_dir || ENV.fetch("HOME")
+        defined?(@password_file_dir) ? @password_file_dir : ENV.fetch("HOME")
       end
 
       attr_writer :key_file_dir
       def key_file_dir
-        @key_file_dir || ENV.fetch("HOME")
+        defined?(@key_file_dir) ? @key_file_dir : ENV.fetch("HOME")
       end
 
       def cipher_name= (cipher_name)
@@ -23,7 +24,7 @@ module Passw3rd
       end
 
       def cipher_name
-        @cipher_name || 'aes-256-cbc'
+        defined?(@cipher_name) ? @cipher_name : 'aes-256-cbc'
       end
     end
 
@@ -109,25 +110,29 @@ module Passw3rd
       key = cipher.random_key
 
       begin
-        File.open(path + KEY_FILE, 'w') {|f| f.write(key.unpack("H*").join) }
-        File.open(path + IV_FILE, 'w') {|f| f.write(iv.unpack("H*").join) }
+        File.open(key_path, 'w') {|f| f.write(key.unpack("H*").join) }
+        File.open(iv_path, 'w') {|f| f.write(iv.unpack("H*").join) }
       rescue
         puts "Couldn't write key/IV to #{path}\n"
         raise $!
       end
       path
     end
+    
+    def self.key_path
+      File.join(::Passw3rd::PasswordService.key_file_dir, KEY_FILE)
+    end
+    
+    def self.iv_path
+      File.join(::Passw3rd::PasswordService.key_file_dir, IV_FILE)
+    end      
 
     protected
     
-    def self.load_key(path=nil) 
-      if path.nil?
-        path = ::Passw3rd::PasswordService.key_file_dir
-      end
-
+    def self.load_key(path=::Passw3rd::PasswordService.key_file_dir) 
       begin
-        key = IO.readlines(File.expand_path(path + KEY_FILE))[0]
-        iv = IO.readlines(File.expand_path(path + IV_FILE))[0]
+        key = IO.readlines(File.expand_path(self.key_path))[0]
+        iv = IO.readlines(self.iv_path)[0]
       rescue Errno::ENOENT
         puts "Couldn't read key/iv from #{path}.  Have they been generated?\n"
         raise $!

@@ -1,4 +1,3 @@
-require 'passw3rd'
 require 'optparse'
 
 module Passw3rd
@@ -24,7 +23,7 @@ module Passw3rd
 
     opts.on('-k', '--key-dir KEY_PATH', 'Use the keys specificed in this directory for encryption or decryption (default is ~/)') do |opt|
       key_path = opt
-      if !File.directory?(File.expand_path(key_path))
+      unless File.directory?(File.expand_path(key_path))
         raise "#{opt} must be a directory"
       end
     end
