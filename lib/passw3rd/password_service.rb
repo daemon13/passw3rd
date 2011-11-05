@@ -2,6 +2,8 @@ require 'open-uri'
 
 module Passw3rd
   class PasswordService
+    APPROVED_CIPHERS = %w{aes-128-cbc aes-256-cbc aes-128-cfb aes-256-cfb}
+    
     class << self
       attr_writer :password_file_dir
       def password_file_dir
@@ -13,7 +15,11 @@ module Passw3rd
         @key_file_dir || ENV.fetch("HOME")
       end
 
-      attr_writer :cipher_name
+      def cipher_name= (cipher_name)
+        raise "Hey man, you can only use #{APPROVED_CIPHERS}, you supplied #{cipher_name}" if cipher_name.nil? || !APPROVED_CIPHERS.include?(cipher_name)
+        @cipher_name = cipher_name
+      end
+
       def cipher_name
         @cipher_name || 'aes-256-cbc'
       end

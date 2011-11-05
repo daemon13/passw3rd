@@ -1,6 +1,10 @@
 require 'spec_helper'
 
 describe ::Passw3rd::PasswordService do 
+  it "restricts ciphers to just a select few" do
+    lambda { ::Passw3rd::PasswordService.cipher_name = "aes-256-donkey" }.should raise_error
+  end
+  
   describe "#_parse_uri" do
     it "detects uris" do
       ::Passw3rd::PasswordService._parse_uri("http://example.com").should be_is_a URI::HTTP
