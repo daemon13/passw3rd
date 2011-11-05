@@ -19,6 +19,7 @@ end
 
 RSpec::Core::RakeTask.new(:spec) do |t|
   t.fail_on_error = false
+  t.verbose = true
 end
 
 task :benchmark do
@@ -28,13 +29,13 @@ task :benchmark do
   ::Passw3rd::PasswordService.configure do |c|
     c.password_file_dir = Dir.tmpdir
     c.key_file_dir = Dir.tmpdir
-    c.cipher_name = "aes-256-cbc"
+    c.cipher_name = ::Passw3rd::APPROVED_CIPHERS.first
   end
 
   Benchmark.bmbm do |x|
     x.report("generate a key, write the encrypted version of #{password} a file, read the password #{n} times") do
       n.times do
-        ::Passw3rd::KeyLoader.create_key_iv_file
+        ::Passw3rd::PasswordService.create_key_iv_file
         ::Passw3rd::PasswordService.write_password_file(password, "test")
         ::Passw3rd::PasswordService.get_password("test")
       end

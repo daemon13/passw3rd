@@ -1,5 +1,3 @@
-require 'base64'
-require 'openssl'
 require 'optparse'
 
 module Passw3rd
@@ -25,7 +23,7 @@ module Passw3rd
 
     opts.on('-k', '--key-dir KEY_PATH', 'Use the keys specificed in this directory for encryption or decryption (default is ~/)') do |opt|
       key_path = opt
-      if !File.directory?(File.expand_path(key_path))
+      unless File.directory?(File.expand_path(key_path))
         raise "#{opt} must be a directory"
       end
     end
@@ -57,7 +55,7 @@ module Passw3rd
 
     # generate key/IV
     if gen_key_path
-     ::Passw3rd::KeyLoader.create_key_iv_file(gen_key_path)
+     ::Passw3rd::PasswordService.create_key_iv_file(gen_key_path)
       puts "generated keys in #{gen_key_path}"
     end
 

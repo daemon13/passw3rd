@@ -1,18 +1,22 @@
 require 'open-uri'
 
 module Passw3rd
+  KEY_FILE = ".passw3rd-encryptionKey"
+  IV_FILE = ".passw3rd-encryptionIV"
+  # more preferred ciphers first
+  APPROVED_CIPHERS = %w{aes-256-cbc aes-256-cfb aes-128-cbc aes-128-cfb}
+  
   class PasswordService
-    APPROVED_CIPHERS = %w{aes-128-cbc aes-256-cbc aes-128-cfb aes-256-cfb}
-    
+
     class << self
       attr_writer :password_file_dir
       def password_file_dir
-        @password_file_dir || ENV.fetch("HOME")
+        defined?(@password_file_dir) ? @password_file_dir : ENV.fetch("HOME")
       end
 
       attr_writer :key_file_dir
       def key_file_dir
-        @key_file_dir || ENV.fetch("HOME")
+        defined?(@key_file_dir) ? @key_file_dir : ENV.fetch("HOME")
       end
 
       def cipher_name= (cipher_name)
@@ -21,7 +25,7 @@ module Passw3rd
       end
 
       def cipher_name
-        @cipher_name || 'aes-256-cbc'
+        defined?(@cipher_name) ? @cipher_name : APPROVED_CIPHERS.first
       end
     end
 
@@ -31,7 +35,7 @@ module Passw3rd
 
     def self.get_password (password_file, key_path = key_file_dir)
       uri = _parse_uri(password_file)
-      encoded_password = Base64.decode64(open(uri.to_s) { |f| f.read })
+      encoded_password = Base64.decode64(open(uri) { |f| f.read })
       decrypt(encoded_password, key_path)
     end
 
@@ -66,7 +70,7 @@ module Passw3rd
         raise err
       end
     end
-    
+
     def self.rotate_keys(args = {})
       unless args.empty?
         ::Passw3rd::PasswordService.configure do |c|
@@ -86,7 +90,7 @@ module Passw3rd
 
       ::Passw3rd::PasswordService.cipher_name = args[:new_cipher] if args[:new_cipher]
 
-      path = ::Passw3rd::KeyLoader.create_key_iv_file
+      path = self.create_key_iv_file
       puts "Wrote new keys to #{path}"
 
       passwords.each do |password|
@@ -96,17 +100,57 @@ module Passw3rd
       end
     end
 
-    protected
+    def self.create_key_iv_file(path=nil)
+      unless path
+        path = ::Passw3rd::PasswordService.key_file_dir || ENV['HOME']
+      end    
 
-    def self.cipher_setup(method, key_path)
-      pair = KeyLoader.load(key_path)
-      cipher = OpenSSL::Cipher::Cipher.new(cipher_name)
-      cipher.send(method)
-      cipher.key = pair.key
-      cipher.iv = pair.iv
-      cipher
+      # d'oh!
+      cipher = OpenSSL::Cipher::Cipher.new(::Passw3rd::PasswordService.cipher_name)
+      iv = cipher.random_iv
+      key = cipher.random_key
+
+      begin
+        File.open(key_path, 'w') {|f| f.write(key.unpack("H*").join) }
+        File.open(iv_path, 'w') {|f| f.write(iv.unpack("H*").join) }
+      rescue
+        puts "Couldn't write key/IV to #{path}\n"
+        raise $!
+      end
+      path
     end
     
+    def self.key_path
+      File.join(::Passw3rd::PasswordService.key_file_dir, KEY_FILE)
+    end
+    
+    def self.iv_path
+      File.join(::Passw3rd::PasswordService.key_file_dir, IV_FILE)
+    end      
+
+    protected
+    
+    def self.load_key(path=::Passw3rd::PasswordService.key_file_dir) 
+      begin
+        key = IO.readlines(File.expand_path(self.key_path))[0]
+        iv = IO.readlines(self.iv_path)[0]
+      rescue Errno::ENOENT
+        puts "Couldn't read key/iv from #{path}.  Have they been generated?\n"
+        raise $!
+      end
+
+      {:key => [key].pack("H*"), :iv => [iv].pack("H*")}
+    end    
+
+    def self.cipher_setup(method, key_path)
+      pair = self.load_key(key_path)
+      cipher = OpenSSL::Cipher::Cipher.new(cipher_name)
+      cipher.send(method)
+      cipher.key = pair[:key]
+      cipher.iv = pair[:iv]
+      cipher
+    end
+
     def self._parse_uri password_file
       unless (password_file =~ URI::regexp(['ftp', 'http', 'https', 'file'])).nil?
         URI.parse(password_file)

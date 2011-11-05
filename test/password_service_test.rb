@@ -6,12 +6,10 @@ require File.expand_path('../../lib/passw3rd.rb',  __FILE__)
 
 class PasswordServiceTest < Test::Unit::TestCase
   def setup
-    random_num = sudorandumb
     @random_string = sudorandumb
-
-    ::Passw3rd::KeyLoader.create_key_iv_file(Dir.tmpdir)
-    ::Passw3rd::PasswordService.key_file_dir = Dir.tmpdir    
-    ::Passw3rd::PasswordService.cipher_name = 'aes-256-cbc'
+    ::Passw3rd::PasswordService.key_file_dir = Dir.tmpdir
+    ::Passw3rd::PasswordService.password_file_dir = Dir.tmpdir    
+    ::Passw3rd::PasswordService.create_key_iv_file
   end
   
   def test_enc_dec
@@ -36,27 +34,27 @@ class PasswordServiceTest < Test::Unit::TestCase
   end
 
   def test_set_and_get_password_custom_dir
-    ::Passw3rd::PasswordService.password_file_dir = Dir.tmpdir    
+    dir = "#{Dir.tmpdir}/#{sudorandumb}"
+    
+    FileUtils.mkdir_p(dir)
+    ::Passw3rd::PasswordService.password_file_dir = dir
 
-    password_file = ::Passw3rd::PasswordService.write_password_file(@random_string, "test2")
+    password_file_path = ::Passw3rd::PasswordService.write_password_file(@random_string, "test2")
+    assert_match(Regexp.new(dir), password_file_path)
+    
     decrypted = ::Passw3rd::PasswordService.get_password("test2")
     assert_equal(@random_string, decrypted)
+    FileUtils.rm_rf(dir)
   end  
 
   def test_configure_with_block
    ::Passw3rd::PasswordService.configure do |c|
-      c.password_file_dir = "/tmp/"
-      c.cipher_name = "aes-256-cbc"
+      c.password_file_dir = Dir.tmpdir
+      c.key_file_dir = Dir.tmpdir
+      c.cipher_name = ::Passw3rd::APPROVED_CIPHERS.first
     end
-    assert_equal(::Passw3rd::PasswordService.password_file_dir, "/tmp/")
-    assert_equal(::Passw3rd::PasswordService.cipher_name, "aes-256-cbc")
-  end
-  
-  def test_gen_key
-    enc = ::Passw3rd::PasswordService.encrypt(@random_string)
-    dec = ::Passw3rd::PasswordService.decrypt(enc)
-    
-    assert_equal(@random_string, dec)
+    assert_equal(::Passw3rd::PasswordService.password_file_dir, Dir.tmpdir)
+    assert_equal(::Passw3rd::PasswordService.cipher_name, ::Passw3rd::APPROVED_CIPHERS.first)
   end
   
   def sudorandumb
