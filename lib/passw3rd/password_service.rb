@@ -91,7 +91,6 @@ module Passw3rd
 
       passwords.each do |password|
         full_path = File.join(::Passw3rd::PasswordService.password_file_dir, password[:file])
-        FileUtils::rm(full_path)
         ::Passw3rd::PasswordService.write_password_file(password[:clear_password], password[:file])    
         puts "Wrote new password to #{full_path}"
       end
