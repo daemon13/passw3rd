@@ -3,7 +3,8 @@ require 'open-uri'
 module Passw3rd
   KEY_FILE = ".passw3rd-encryptionKey"
   IV_FILE = ".passw3rd-encryptionIV"
-  APPROVED_CIPHERS = %w{aes-128-cbc aes-256-cbc aes-128-cfb aes-256-cfb}
+  # more preferred ciphers first
+  APPROVED_CIPHERS = %w{aes-256-cbc aes-256-cfb aes-128-cbc aes-128-cfb}
   
   class PasswordService
 
@@ -24,7 +25,7 @@ module Passw3rd
       end
 
       def cipher_name
-        defined?(@cipher_name) ? @cipher_name : 'aes-256-cbc'
+        defined?(@cipher_name) ? @cipher_name : APPROVED_CIPHERS.first
       end
     end
 
