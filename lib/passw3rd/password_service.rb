@@ -31,7 +31,7 @@ module Passw3rd
 
     def self.get_password (password_file, key_path = key_file_dir)
       uri = _parse_uri(password_file)
-      encoded_password = Base64.decode64(open(uri.to_s) { |f| f.read })
+      encoded_password = Base64.decode64(open(uri) { |f| f.read })
       decrypt(encoded_password, key_path)
     end
 
