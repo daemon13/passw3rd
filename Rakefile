@@ -1,13 +1,14 @@
 require "rake"
 require "rake/testtask"
 require "rspec/core/rake_task"
+require "cucumber/rake/task"
 require "passw3rd"
 require "benchmark"
 require "tmpdir"
 
 
 desc "Default: run unit tests."
-task :default => [:test, :spec, :benchmark]
+task :default => [:test, :spec, :cukes, :benchmark]
 
 desc "Test the passw3rd gem"
 Rake::TestTask.new(:test) do |t|
@@ -20,6 +21,10 @@ end
 RSpec::Core::RakeTask.new(:spec) do |t|
   t.fail_on_error = false
   t.verbose = true
+end
+
+Cucumber::Rake::Task.new(:cukes) do |t|
+  t.cucumber_opts = %w{--format pretty}
 end
 
 task :benchmark do
