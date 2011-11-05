@@ -35,7 +35,7 @@ task :benchmark do
   Benchmark.bmbm do |x|
     x.report("generate a key, write the encrypted version of #{password} a file, read the password #{n} times") do
       n.times do
-        ::Passw3rd::KeyLoader.create_key_iv_file
+        ::Passw3rd::PasswordService.create_key_iv_file
         ::Passw3rd::PasswordService.write_password_file(password, "test")
         ::Passw3rd::PasswordService.get_password("test")
       end

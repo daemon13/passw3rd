@@ -1,5 +1,4 @@
-require 'base64'
-require 'openssl'
+require 'passw3rd'
 require 'optparse'
 
 module Passw3rd
@@ -57,7 +56,7 @@ module Passw3rd
 
     # generate key/IV
     if gen_key_path
-     ::Passw3rd::KeyLoader.create_key_iv_file(gen_key_path)
+     ::Passw3rd::PasswordService.create_key_iv_file(gen_key_path)
       puts "generated keys in #{gen_key_path}"
     end
 

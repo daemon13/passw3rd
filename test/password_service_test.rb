@@ -9,8 +9,7 @@ class PasswordServiceTest < Test::Unit::TestCase
     @random_string = sudorandumb
     ::Passw3rd::PasswordService.key_file_dir = Dir.tmpdir
     ::Passw3rd::PasswordService.password_file_dir = Dir.tmpdir    
-
-    ::Passw3rd::KeyLoader.create_key_iv_file
+    ::Passw3rd::PasswordService.create_key_iv_file
   end
   
   def test_enc_dec
