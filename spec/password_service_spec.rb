@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe ::Passw3rd::PasswordService do 
-  it "restricts ciphers to just a select few" do
+  it "restricts assigning ciphers to just a select few" do
     lambda { ::Passw3rd::PasswordService.cipher_name = "aes-256-donkey" }.should raise_error
   end
   
