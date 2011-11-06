@@ -1,5 +1,9 @@
 ![Build status](https://secure.travis-ci.org/oreoshake/passw3rd.png)
 
+It's only failing because it can't find the system ruby.  If you have a solution, checkout bin/passw3rd please :)
+
+It will still work on your machine.
+
 Introduction
 ------------------------------------------------------------------------------
 
