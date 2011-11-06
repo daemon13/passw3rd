@@ -1,3 +1,9 @@
+=== 0.2.0 / 2011-11-5
+
+Added acceptance tests as a contract for future features.  
+Collapsed the KeyLoader class, eliminated the KeyPair class.  If for some reason you referenced those classes, things will break.  But you wouldn't do that, would you?
+More testing goodness.
+
 === 0.1.3 / 2011-11-4
 
 From key rotation, arose cipher changing
