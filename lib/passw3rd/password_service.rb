@@ -33,10 +33,12 @@ module Passw3rd
       instance_eval &block
     end
 
-    def self.get_password (password_file, key_path = key_file_dir)
+    def self.get_password (password_file, options = {:key_path => key_file_dir, :force => false})
       uri = _parse_uri(password_file)
       encoded_password = Base64.decode64(open(uri) { |f| f.read })
-      decrypt(encoded_password, key_path)
+      decrypt(encoded_password, options[:key_path])
+    rescue
+      raise ArgumentError, "Could not decrypt passw3rd file" if options[:force]
     end
 
     def self.write_password_file(password, output_path, key_path = key_file_dir)

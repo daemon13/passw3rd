@@ -61,7 +61,7 @@ module Passw3rd
 
     # decrypt password_file using the key/IV in key_path
     if mode == "decrypt"
-      decrypted =::Passw3rd::PasswordService.get_password(password_file, key_path)
+      decrypted =::Passw3rd::PasswordService.get_password(password_file, :key_path => key_path)
       puts "The password is: #{decrypted}"
     end
 
