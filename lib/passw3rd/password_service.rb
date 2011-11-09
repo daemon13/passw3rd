@@ -37,8 +37,8 @@ module Passw3rd
       uri = _parse_uri(password_file)
       encoded_password = Base64.decode64(open(uri) { |f| f.read })
       decrypt(encoded_password, options[:key_path])
-    rescue
-      raise ArgumentError, "Could not decrypt passw3rd file" if options[:force]
+    rescue => e
+      raise ArgumentError, "Could not decrypt passw3rd file #{password_file} - #{e}" if options[:force]
     end
 
     def self.write_password_file(password, output_path, key_path = key_file_dir)
@@ -68,7 +68,7 @@ module Passw3rd
         d = cipher.update(cipher_text)
         d << cipher.final
       rescue OpenSSL::Cipher::CipherError => err
-        puts "Couldn't decrypt password.  Are you using the right keys (#{key_path})?"
+        puts "Couldn't decrypt password #{cipher_text}.  Are you using the right keys (#{key_path})?"
         raise err
       end
     end
