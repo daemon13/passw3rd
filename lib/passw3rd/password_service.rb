@@ -33,7 +33,7 @@ module Passw3rd
       instance_eval &block
     end
 
-    def self.get_password (password_file, options = {:key_path => key_file_dir, :force => false})
+    def self.get_password (password_file, options = {:key_path => self.key_file_dir, :force => true})
       uri = _parse_uri(password_file)
       encoded_password = Base64.decode64(open(uri) { |f| f.read })
       decrypt(encoded_password, options[:key_path])
