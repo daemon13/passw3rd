@@ -11,12 +11,12 @@ module Passw3rd
     class << self
       attr_writer :password_file_dir
       def password_file_dir
-        defined?(@password_file_dir) ? @password_file_dir : ENV.fetch("HOME")
+        defined?(@password_file_dir) ? @password_file_dir : Dir.getwd
       end
 
       attr_writer :key_file_dir
       def key_file_dir
-        defined?(@key_file_dir) ? @key_file_dir : ENV.fetch("HOME")
+        defined?(@key_file_dir) ? @key_file_dir : Dir.getwd
       end
 
       def cipher_name= (cipher_name)
