@@ -75,7 +75,7 @@ Then /^the keys should be rotated$/ do
 end
 
 When /^I change the cipher for my password files from "(.*)" to "(.*)"$/ do |from, to|
-  ::Passw3rd::PasswordService.rotate_keys(:password_file_dir => ENV['passw3rd-password_file_dir'], :key_file_dir => ENV['passw3rd-key_file_dir'], cipher: from, new_ciphter: to)
+  ::Passw3rd::PasswordService.rotate_keys(:password_file_dir => ENV['passw3rd-password_file_dir'], :key_file_dir => ENV['passw3rd-key_file_dir'], :cipher => from, :new_ciphter => to)
 end
 
 Then /^the keys should be (\d+) bits long$/ do |x|
