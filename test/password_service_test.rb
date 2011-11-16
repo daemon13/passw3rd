@@ -7,12 +7,16 @@ require File.expand_path('../../lib/passw3rd.rb',  __FILE__)
 class PasswordServiceTest < Test::Unit::TestCase
   def setup
     @random_string = sudorandumb
-    ::Passw3rd::PasswordService.key_file_dir = Dir.tmpdir
-    ::Passw3rd::PasswordService.password_file_dir = Dir.tmpdir    
+  end
+
+  def setup_sandbox(path = Dir.tmpdir)
+    ::Passw3rd::PasswordService.key_file_dir = path
+    ::Passw3rd::PasswordService.password_file_dir = path
     ::Passw3rd::PasswordService.create_key_iv_file
   end
   
   def test_enc_dec
+    setup_sandbox
     enc = ::Passw3rd::PasswordService.encrypt(@random_string)
     dec = ::Passw3rd::PasswordService.decrypt(enc)
     
@@ -28,6 +32,7 @@ class PasswordServiceTest < Test::Unit::TestCase
   end
 
   def test_set_and_get_password
+    setup_sandbox
     password_file = ::Passw3rd::PasswordService.write_password_file(@random_string, "test")
     decrypted = ::Passw3rd::PasswordService.get_password("test")
     assert_equal(@random_string, decrypted)
@@ -35,17 +40,21 @@ class PasswordServiceTest < Test::Unit::TestCase
 
   def test_set_and_get_password_custom_dir
     dir = "#{Dir.tmpdir}/#{sudorandumb}"
-    
-    FileUtils.mkdir_p(dir)
     ::Passw3rd::PasswordService.password_file_dir = dir
+    ::Passw3rd::PasswordService.key_file_dir = dir
 
-    password_file_path = ::Passw3rd::PasswordService.write_password_file(@random_string, "test2")
-    assert_match(Regexp.new(dir), password_file_path)
-    
-    decrypted = ::Passw3rd::PasswordService.get_password("test2")
-    assert_equal(@random_string, decrypted)
-    FileUtils.rm_rf(dir)
+    assert_passw3rd_cycle(dir)
   end  
+
+  def test_with_env_vars
+    ::Passw3rd::PasswordService.key_file_dir = nil
+    ::Passw3rd::PasswordService.password_file_dir = nil
+    dir = "#{Dir.tmpdir}/#{sudorandumb}"
+    ENV['passw3rd-password_file_dir'] = dir
+    ENV['passw3rd-key_file_dir'] = dir
+
+    assert_passw3rd_cycle(dir)
+  end
 
   def test_configure_with_block
    ::Passw3rd::PasswordService.configure do |c|
@@ -59,5 +68,19 @@ class PasswordServiceTest < Test::Unit::TestCase
   
   def sudorandumb
     Digest::SHA1.hexdigest(Time.now.to_s.split(//).sort_by{rand}.join)
+  end
+
+  def assert_passw3rd_cycle dir
+    FileUtils.mkdir_p(dir)
+    path = ::Passw3rd::PasswordService.create_key_iv_file
+
+    id = sudorandumb
+    password_file_path = ::Passw3rd::PasswordService.write_password_file(@random_string, "test#{id}")
+    assert_match(Regexp.new(dir), password_file_path)
+    
+    decrypted = ::Passw3rd::PasswordService.get_password("test#{id}")
+    assert_equal(@random_string, decrypted)
+
+    FileUtils.rm_rf(dir)
   end
 end

@@ -31,19 +31,14 @@ module Passw3rd
     opts.on('-p', '--password-dir PATH', 'Read and write password files to this directory (default is ~/)') do |opt|
       password_dir = opt
       ::Passw3rd::PasswordService.password_file_dir = password_dir
-      if !File.directory?(File.expand_path(password_dir))
+      unless File.directory?(File.expand_path(password_dir))
         raise "#{password_dir} must be a directory"
       end      
     end
 
     opts.on('-g', '--generate-key [PATH]', 'generate key/iv and store in PATH, defaults to the home directory') do |opt|
       gen_key_path = opt
-      if gen_key_path.nil?
-        gen_key_path = ENV["HOME"]
-      end
-      if !File.directory?(File.expand_path(gen_key_path))
-        raise "#{opt} is not a directory"
-      end
+      gen_key_path ||= ::Passw3rd::PasswordService.key_file_dir
     end
 
     opts.on_tail("-h", "--help", "Show this message") do
@@ -55,8 +50,8 @@ module Passw3rd
 
     # generate key/IV
     if gen_key_path
-     ::Passw3rd::PasswordService.create_key_iv_file(gen_key_path)
-      puts "generated keys in #{gen_key_path}"
+      path = ::Passw3rd::PasswordService.create_key_iv_file(gen_key_path)
+      puts "generated keys in #{path}"
     end
 
     # decrypt password_file using the key/IV in key_path

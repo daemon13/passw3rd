@@ -11,17 +11,17 @@ module Passw3rd
     class << self
       attr_writer :password_file_dir
       def password_file_dir
-        defined?(@password_file_dir) ? @password_file_dir : Dir.getwd
+        @password_file_dir || ENV['passw3rd-password_file_dir'] || Dir.getwd
       end
 
       attr_writer :key_file_dir
       def key_file_dir
-        defined?(@key_file_dir) ? @key_file_dir : Dir.getwd
+        @key_file_dir || ENV['passw3rd-key_file_dir'] || Dir.getwd
       end
 
       def cipher_name= (cipher_name)
         raise "Hey man, you can only use #{APPROVED_CIPHERS}, you supplied #{cipher_name}" if cipher_name.nil? || !APPROVED_CIPHERS.include?(cipher_name)
-        @cipher_name = cipher_name
+        @cipher_name = ENV['passw3rd-cipher_name'] || cipher_name
       end
 
       def cipher_name
@@ -35,21 +35,21 @@ module Passw3rd
 
     def self.get_password (password_file, options = {:key_path => self.key_file_dir, :force => true})
       uri = _parse_uri(password_file)
-      encoded_password = Base64.decode64(open(uri) { |f| f.read })
+      encoded_password = read_file(uri)
       decrypt(encoded_password, options[:key_path])
     rescue => e
       raise ArgumentError, "Could not decrypt passw3rd file #{password_file} - #{e}" if options[:force]
     end
 
-    def self.write_password_file(password, output_path, key_path = key_file_dir)
+    def self.write_password_file(password, output_path, key_path = self.key_file_dir)
       enc_password = encrypt(password, key_path)
       base64pw = Base64.encode64(enc_password) 
       path = File.join(password_file_dir, output_path)
-      open(path, 'w') { |f| f.write base64pw }
+      write_file(path, base64pw)
       path
     end
 
-    def self.encrypt(password, key_path = key_file_dir)
+    def self.encrypt(password, key_path = self.key_file_dir)
       raise ArgumentError, "password cannot be blank" if password.to_s.empty?
 
       cipher = cipher_setup(:encrypt, key_path)
@@ -62,7 +62,7 @@ module Passw3rd
       end
     end
 
-    def self.decrypt(cipher_text, key_path = key_file_dir)
+    def self.decrypt(cipher_text, key_path = self.key_file_dir)
       cipher = cipher_setup(:decrypt, key_path)
       begin
         d = cipher.update(cipher_text)
@@ -102,9 +102,9 @@ module Passw3rd
       end
     end
 
-    def self.create_key_iv_file(path=nil)
+    def self.create_key_iv_file(path = nil)
       unless path
-        path = ::Passw3rd::PasswordService.key_file_dir || ENV['HOME']
+        path = ::Passw3rd::PasswordService.key_file_dir
       end    
 
       # d'oh!
@@ -113,8 +113,8 @@ module Passw3rd
       key = cipher.random_key
 
       begin
-        File.open(key_path, 'w') {|f| f.write(key.unpack("H*").join) }
-        File.open(iv_path, 'w') {|f| f.write(iv.unpack("H*").join) }
+        File.open(self.key_path(path), 'w') {|f| f.write(key.unpack("H*").join) }
+        File.open(self.iv_path(path), 'w') {|f| f.write(iv.unpack("H*").join) }
       rescue
         puts "Couldn't write key/IV to #{path}\n"
         raise $!
@@ -122,23 +122,23 @@ module Passw3rd
       path
     end
     
-    def self.key_path
-      File.join(::Passw3rd::PasswordService.key_file_dir, KEY_FILE)
+    def self.key_path(path= self.key_file_dir)
+      File.join(path || self.key_file_dir, KEY_FILE)
     end
     
-    def self.iv_path
-      File.join(::Passw3rd::PasswordService.key_file_dir, IV_FILE)
+    def self.iv_path(path = ::Passw3rd::PasswordService.key_file_dir)
+      File.join(path || self.key_file_dir, IV_FILE)
     end      
 
     protected
     
-    def self.load_key(path=::Passw3rd::PasswordService.key_file_dir) 
+    def self.load_key(path = ::Passw3rd::PasswordService.key_file_dir)
       begin
-        key = IO.readlines(File.expand_path(self.key_path))[0]
-        iv = IO.readlines(self.iv_path)[0]
-      rescue Errno::ENOENT
-        puts "Couldn't read key/iv from #{path}.  Have they been generated?\n"
-        raise $!
+        key = IO.readlines(File.expand_path(self.key_path(path)))[0]
+        iv = IO.readlines(File.expand_path(self.iv_path(path)))[0]
+      rescue StandardError => e
+        puts "Couldn't read key/iv from #{self.key_path(path)}.  Have they been generated?\n"
+        raise e
       end
 
       {:key => [key].pack("H*"), :iv => [iv].pack("H*")}
@@ -159,6 +159,14 @@ module Passw3rd
       else
         File.join(password_file_dir, password_file)
       end
+    end
+
+    def self.read_file uri
+      Base64.decode64(open(uri) { |f| f.read })
+    end
+
+    def self.write_file path, value
+      open(path, 'w') { |f| f.write value }
     end
   end
 end

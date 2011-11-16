@@ -4,6 +4,9 @@ Feature: Passw3rd command line client
   With proper access to password files
   I want to manage keys and password files
   # extract the test[n] garbage
+
+  Background:
+    Given I have configured passw3rd to work in a sandbox
   
   Scenario: generate keys
     When I generate keys
@@ -31,6 +34,7 @@ Feature: Passw3rd command line client
     Given I have generated keys
     And I have a password file named "test4" for the password "passw3rd"
     And I remember the encrypted value for the file "test4"
+    And I remember my keys
     When I rotate my keys
     Then the encrypted password in the file "test4" should have changed
     And the keys should be rotated
@@ -41,6 +45,6 @@ Feature: Passw3rd command line client
     And I have a password file named "test5" for the password "passw3rd"
     And I remember the encrypted value for the file "test5"
     When I set the cipher to "aes-256-ofb"
-    And I change the cipher for my password files
+    And I change the cipher for my password files from "aes-128-cbc" to "aes-256-ofb"
     Then the encrypted password in the file "test5" should have changed
     And the keys should be 256 bits long
