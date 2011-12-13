@@ -1,5 +1,7 @@
 source :rubygems
 
+gem "jruby-openssl", :platform => :jruby
+
 group :development, :test do
   gem 'rake'
   gem 'guard'

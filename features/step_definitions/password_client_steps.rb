@@ -43,6 +43,7 @@ end
 
 When /^I generate keys$/ do
   steps %Q{
+    
     When I successfully run `passw3rd -g`
   }
 end
