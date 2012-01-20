@@ -38,7 +38,7 @@ module Passw3rd
       encoded_password = read_file(uri)
       decrypt(encoded_password, options[:key_path])
     rescue => e
-      raise ArgumentError, "Could not decrypt passw3rd file #{password_file} - #{e}" if options[:force]
+      raise e, "Could not decrypt passw3rd file #{password_file} - #{e}" if options[:force]
     end
 
     def self.write_password_file(password, output_path, key_path = self.key_file_dir)
@@ -63,12 +63,34 @@ module Passw3rd
     end
 
     def self.decrypt(cipher_text, key_path = self.key_file_dir)
-      cipher = cipher_setup(:decrypt, key_path)
       begin
-        d = cipher.update(cipher_text)
-        d << cipher.final
-      rescue OpenSSL::Cipher::CipherError => err
+        do_decrypt(cipher_text, key_path, cipher_name)
+      rescue StandardError => err
         puts "Couldn't decrypt password #{cipher_text}.  Are you using the right keys (#{key_path})?"
+        puts "Trying other ciphers..."
+        APPROVED_CIPHERS.each do | cipher |
+          begin
+            if do_decrypt(cipher_text, key_path, cipher)
+              puts <<-EOS
+                I wasn't able to decrypt using the provided setup, but I was able
+                to decrypt the files use the #{cipher} cipher.
+
+                Add the following config (for rails, in boot.rb)
+
+                ENV['passw3rd-cipher_name'] = '#{cipher}'
+
+                OR
+
+                ::Passw3rd::PasswordService.configure do |c|
+                  c.cipher_name = '#{cipher}'
+                end
+              EOS
+            end
+          rescue Exception => e
+            # long hair don't care
+          end
+        end
+
         raise err
       end
     end
@@ -144,9 +166,9 @@ module Passw3rd
       {:key => [key].pack("H*"), :iv => [iv].pack("H*")}
     end    
 
-    def self.cipher_setup(method, key_path)
+    def self.cipher_setup(method, key_path, cipher_override = nil)
       pair = self.load_key(key_path)
-      cipher = OpenSSL::Cipher::Cipher.new(cipher_name)
+      cipher = OpenSSL::Cipher::Cipher.new(cipher_override || cipher_name)
       cipher.send(method)
       cipher.key = pair[:key]
       cipher.iv = pair[:iv]
@@ -167,6 +189,12 @@ module Passw3rd
 
     def self.write_file path, value
       open(path, 'w') { |f| f.write value }
+    end
+
+    def self.do_decrypt(cipher_text, key_path, cipher)
+      cipher = cipher_setup(:decrypt, key_path, cipher)
+      d = cipher.update(cipher_text)
+      d << cipher.final
     end
   end
 end

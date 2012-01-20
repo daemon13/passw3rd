@@ -14,6 +14,20 @@ class PasswordServiceTest < Test::Unit::TestCase
     ::Passw3rd::PasswordService.password_file_dir = path
     ::Passw3rd::PasswordService.create_key_iv_file
   end
+
+  def test_detect_cipher
+    ::Passw3rd::PasswordService.cipher_name = ::Passw3rd::APPROVED_CIPHERS.last
+    setup_sandbox
+
+    enc = ::Passw3rd::PasswordService.encrypt(@random_string)
+    dec = ::Passw3rd::PasswordService.decrypt(enc)
+
+    ::Passw3rd::PasswordService.cipher_name = ::Passw3rd::APPROVED_CIPHERS.first
+
+    assert_raise(OpenSSL::Cipher::CipherError) do 
+      ::Passw3rd::PasswordService.decrypt(enc)    
+    end
+  end
   
   def test_enc_dec
     setup_sandbox
@@ -83,4 +97,6 @@ class PasswordServiceTest < Test::Unit::TestCase
 
     FileUtils.rm_rf(dir)
   end
+
+
 end
