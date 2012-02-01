@@ -5,7 +5,6 @@ rvm:
    - ruby-head
    - ree  
    - jruby
-   - rbx-2.0   
    
 notifications:
   email:
