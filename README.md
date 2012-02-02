@@ -66,8 +66,18 @@ Key rotation: simple
 ------------------------------------------------------------------------------
 Ruby on Rails config/database.yml
  
-    initializer:
-    ::Passw3rd::PasswordService.password_file_dir = "passwords"
+Example configuration in boot.rb:
+
+    ENV['passw3rd-cipher_name'] = 'aes-256-cbc'
+    if %w{production staging}.include? ENV['RAILS_ENV']
+      ENV['passw3rd-password_file_dir'] = File.expand_path('../../passwords/production', __FILE__)
+      ENV['passw3rd-key_file_dir'] = File.expand_path('../../passwords/production', __FILE__)
+    else
+      ENV['passw3rd-password_file_dir'] = File.expand_path('../../passwords', __FILE__)
+      ENV['passw3rd-key_file_dir'] = File.expand_path('../../passwords', __FILE__)
+    end	
+
+Then remove passwords from config files and source code
  
     Before:
  
