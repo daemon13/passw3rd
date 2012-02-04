@@ -58,6 +58,19 @@ Command line use
         The password is: asdf
 ------------------------------------------------------------------------------
 
+Options
+------------------------------------------------------------------------------
+Common options per read/write operation
+
+        -d, --decrypt PATH_TO_PASSWORD   Path to password file
+        -e, --encrypt PASSWORD_FILE      Write the password to this location
+        -k, --key-dir KEY_PATH           Use the keys specificed in this directory for encryption or decryption (default is ~/)
+        -p, --password-dir PATH          Read and write password files to this directory (default is ~/)
+    
+Only used when generating keys   
+
+        -g, --generate-key [PATH]        generate key/iv and store in PATH, defaults to the home directory
+
 Key rotation: simple
 ------------------------------------------------------------------------------
 
