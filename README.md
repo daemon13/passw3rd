@@ -1,4 +1,4 @@
-![Build status](https://secure.travis-ci.org/oreoshake/passw3rd.png)
+[![Build Status](https://secure.travis-ci.org/oreoshake/passw3rd.png)](http://travis-ci.org/oreoshake/passw3rd)
 
 Introduction
 ------------------------------------------------------------------------------
@@ -17,7 +17,7 @@ Some advantages of keeping credentials out of source code are:
    all instances.
 6. Leaving credentials in source code leads to poor password management in
    general. If changing a credential requires you to change code, you are less
-   likely to want to do it. 
+   likely to want to do it.
 
 
 Status
@@ -28,26 +28,25 @@ This project is IN PROGRESS. File bugs and feature requests.
 Examples
 ------------------------------------------------------------------------------
 Command line use
- 
     Generate key/iv in current directory by default
- 
+
         $ passw3rd -g
         generated keys in /Users/user
- 
+
         $ passw3rd -g ~/Desktop/
         generated keys in /Users/user/Desktop/
- 
+
     Create a password file
- 
+
         $ passw3rd -e foobar_app
-        Enter the password: 
+        Enter the password:
         Wrote password to /Users/neilmatatall/foobar_app
         $ passw3rd -e foobar_app -p ~/Desktop/
-        Enter the password: 
+        Enter the password:
         Wrote password to /Users/neilmatatall/Desktop/foobar_app
- 
+
     Read a password file
- 
+
         $ passw3rd -d foobar_app
         The password is: asdf
         $ passw3rd -d foobar_app -p ~/Desktop/
@@ -62,8 +61,8 @@ Common options per read/write operation
         -e, --encrypt PASSWORD_FILE      Write the password to this location
         -k, --key-dir KEY_PATH           Use the keys specificed in this directory for encryption or decryption (default is current directory)
         -p, --password-dir PATH          Read and write password files to this directory (default is current directory)
-    
-Only used when generating keys   
+
+Only used when generating keys
 
         -g, --generate-key [PATH]        generate key/iv and store in PATH, defaults to the current directory
 
@@ -71,10 +70,10 @@ Key rotation: simple
 ------------------------------------------------------------------------------
 
     $ rake rotate_keys[~/passwords,~/passwords,aes-256-cbc]
-  
+
 ------------------------------------------------------------------------------
 Ruby on Rails config/database.yml
- 
+
 Example configuration in boot.rb:
 
     ENV['passw3rd-cipher_name'] = 'aes-256-cbc'
@@ -84,30 +83,30 @@ Example configuration in boot.rb:
     else
       ENV['passw3rd-password_file_dir'] = File.expand_path('../../passwords', __FILE__)
       ENV['passw3rd-key_file_dir'] = File.expand_path('../../passwords', __FILE__)
-    end	
+    end
 
 Then remove passwords from config files and source code
- 
+
     Before:
- 
+
     development:
       adapter: mysql
       database: rails_development
       username: root
       password: my super secret password
- 
- 
+
+
     After:
- 
+
     development:
       adapter: mysql
       database: rails_development
       username: root
       password: <%= PasswordService.get_password('foobar_app') -%>
- 
+
 ------------------------------------------------------------------------------
 OpenSSL command line
- 
+
     $ openssl enc -e -aes-256-cbc -K `cat ~/.passw3rd-encryptionKey`  -iv `cat ~/.passw3rd-encryptionIV` -in README.md -out test.out
     $ openssl enc -d -aes-256-cbc -K `cat ~/.passw3rd-encryptionKey`  -iv `cat ~/.passw3rd-encryptionIV` -out README.md -in test.out
 
